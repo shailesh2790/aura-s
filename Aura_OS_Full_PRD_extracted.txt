@@ -1,0 +1,47 @@
+﻿Aura OS PRD v2 – Reliable Autonomous Agentic OS for Product Teams
+POSITIONING
+Aura OS turns product goals into verified outcomes. It plans, executes, checks, and ships PM work across docs, Jira/Linear, and analytics with production-grade reliability.
+CORE INSIGHT
+Aura combines autonomy (goal-driven agents) with determinism, verification, observability, and governance—solving the reliability gap in agentic automation.
+TARGET USERS
+Primary: Product Managers
+Secondary: Founders
+Tertiary: Product Ops / Engineering Managers
+PRODUCT PRINCIPLES
+1. Plan-first execution
+2. Evidence over eloquence
+3. Verify by default
+4. Safe autonomy
+5. Replayable runs
+6. Human-in-the-loop only at risk points
+CORE FEATURES
+- Goal → Plan → Execute → Verify → Deliver pipeline
+- Verified Output Engine for PRDs, research, Jira tickets
+- Deterministic runs with variance control
+- Self-healing runtime with retries and fallbacks
+- Approval gates and policy engine
+- Multi-layer memory (project, org, user, run)
+- PM-native apps (PRD, competitive analysis, backlog, reports)
+- Full observability with run console and replay
+ARCHITECTURE
+Intent Parser
+Planner (DAG generation)
+Executor (tool calls)
+Verifier
+Policy Engine
+Memory Service
+Run Store
+Integration Layer
+RELIABILITY REQUIREMENTS
+99.5% run-start success
+Replayable executions
+Cost and token limits
+CI-tested workflows
+ROADMAP
+Phase 1: PRD Autopilot
+Phase 2: Backlog Autopilot
+Phase 3: Ops Autopilot
+PRICING
+Free, Pro, Team, Enterprise tiers aligned to automation value
+MOAT
+Verification suites, run replay, policy gates, scoped memory, self-healing runtime
