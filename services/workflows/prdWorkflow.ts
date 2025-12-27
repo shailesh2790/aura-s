@@ -13,6 +13,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { eventStore } from '../runtime/eventStore';
 import { Artifact, Intent } from '../../types/advanced';
+import {
+  initializeMemorySystem,
+  recordRun,
+  factualMemoryStore,
+  experientialMemoryStore,
+  workingMemoryManager
+} from '../memory';
 
 // ============= TYPES =============
 
@@ -263,9 +270,20 @@ async function writePRD(
 /**
  * Execute PRD generation workflow (Prompt Chaining pattern)
  */
-export async function generatePRD(intent: Intent): Promise<Artifact> {
+export async function generatePRD(intent: Intent, userId?: string): Promise<Artifact> {
   const runId = uuidv4();
   const startTime = Date.now();
+
+  // Initialize memory system for this run (if userId provided)
+  if (userId) {
+    await initializeMemorySystem(userId, runId, `Generate PRD for: ${intent.raw}`);
+
+    // Retrieve relevant past experiences
+    const pastSuccesses = await experientialMemoryStore.getSuccesses(userId, 5);
+    const pastPatterns = await experientialMemoryStore.getPatterns(userId, 3);
+
+    console.log(`Retrieved ${pastSuccesses.length} past successes and ${pastPatterns.length} patterns for context`);
+  }
 
   // Emit run started
   await eventStore.append({
@@ -362,6 +380,17 @@ export async function generatePRD(intent: Intent): Promise<Artifact> {
       artifact_ids: [artifact.id]
     } as any);
 
+    // Record memories from this run (if userId provided)
+    if (userId) {
+      try {
+        const memories = await recordRun(runId, userId);
+        console.log(`Recorded ${memories.factual.length} factual + ${memories.experiential.length} experiential memories`);
+      } catch (memError) {
+        console.error('Error recording memories:', memError);
+        // Don't fail the whole run if memory recording fails
+      }
+    }
+
     return artifact;
 
   } catch (error: any) {
@@ -379,6 +408,15 @@ export async function generatePRD(intent: Intent): Promise<Artifact> {
       },
       final_status: 'failed'
     } as any);
+
+    // Record failure as experiential memory (if userId provided)
+    if (userId) {
+      try {
+        await recordRun(runId, userId);
+      } catch (memError) {
+        console.error('Error recording failure memory:', memError);
+      }
+    }
 
     throw error;
   }
