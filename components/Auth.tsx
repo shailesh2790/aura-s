@@ -4,16 +4,19 @@
  * Handles waitlist signup, login, and account creation
  */
 
-import React, { useState } from 'react';
-import { LogIn, UserPlus, Mail, Lock, Loader2, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LogIn, UserPlus, Mail, Lock, Loader2, CheckCircle, AlertCircle, Sparkles, KeyRound } from 'lucide-react';
 import {
   joinWaitlist,
   signInWithEmail,
   signUpWithEmail,
-  checkWaitlistStatus
+  checkWaitlistStatus,
+  resetPassword,
+  updatePassword,
+  supabase
 } from '../lib/supabase';
 
-type AuthMode = 'waitlist' | 'signin' | 'signup';
+type AuthMode = 'waitlist' | 'signin' | 'signup' | 'reset' | 'update-password';
 
 export function Auth() {
   const [mode, setMode] = useState<AuthMode>('waitlist');
@@ -123,6 +126,81 @@ export function Auth() {
     setLoading(false);
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    const result = await resetPassword(email);
+
+    setMessage({
+      type: result.success ? 'success' : 'error',
+      text: result.message
+    });
+
+    if (result.success) {
+      setEmail('');
+      setTimeout(() => setMode('signin'), 3000);
+    }
+
+    setLoading(false);
+  };
+
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    if (newPassword !== confirmPassword) {
+      setMessage({
+        type: 'error',
+        text: 'Passwords do not match. Please try again.'
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setMessage({
+        type: 'error',
+        text: 'Password must be at least 8 characters long.'
+      });
+      setLoading(false);
+      return;
+    }
+
+    const result = await updatePassword(newPassword);
+
+    setMessage({
+      type: result.success ? 'success' : 'error',
+      text: result.message
+    });
+
+    if (result.success) {
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(async () => {
+        await supabase.auth.signOut();
+        setMode('signin');
+        setMessage({ type: 'info', text: 'Please sign in with your new password.' });
+      }, 2000);
+    }
+
+    setLoading(false);
+  };
+
+  // Check if user arrived with password recovery token
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setMode('update-password');
+      }
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-8">
       <div className="max-w-md w-full">
@@ -136,10 +214,13 @@ export function Auth() {
             {mode === 'waitlist' && 'Join the waitlist for early access'}
             {mode === 'signin' && 'Sign in to your account'}
             {mode === 'signup' && 'Create your account'}
+            {mode === 'reset' && 'Reset your password'}
+            {mode === 'update-password' && 'Set your new password'}
           </p>
         </div>
 
         {/* Mode Tabs */}
+        {mode !== 'update-password' && (
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setMode('waitlist')}
@@ -181,6 +262,7 @@ export function Auth() {
             </span>
           </button>
         </div>
+        )}
 
         {/* Message */}
         {message && (
@@ -334,9 +416,14 @@ export function Auth() {
               )}
             </button>
 
-            <p className="text-xs text-slate-500 text-center">
-              Don't have an account? <button type="button" onClick={() => setMode('waitlist')} className="text-slate-900 font-medium hover:underline">Join waitlist</button>
-            </p>
+            <div className="flex justify-between text-xs text-slate-500">
+              <button type="button" onClick={() => setMode('reset')} className="text-slate-700 font-medium hover:underline">
+                Forgot password?
+              </button>
+              <button type="button" onClick={() => setMode('waitlist')} className="text-slate-900 font-medium hover:underline">
+                Join waitlist
+              </button>
+            </div>
           </form>
         )}
 
@@ -425,6 +512,108 @@ export function Auth() {
             <p className="text-xs text-slate-500 text-center">
               Already have an account? <button type="button" onClick={() => setMode('signin')} className="text-slate-900 font-medium hover:underline">Sign in</button>
             </p>
+          </form>
+        )}
+
+        {/* Reset Password Form */}
+        {mode === 'reset' && (
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-900 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="you@company.com"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                />
+              </div>
+
+              <p className="text-xs text-slate-600">
+                We'll send you an email with a link to reset your password.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 size={20} className="animate-spin" />
+                  Sending email...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <KeyRound size={20} />
+                  Send Reset Link
+                </span>
+              )}
+            </button>
+
+            <p className="text-xs text-slate-500 text-center">
+              Remember your password? <button type="button" onClick={() => setMode('signin')} className="text-slate-900 font-medium hover:underline">Sign in</button>
+            </p>
+          </form>
+        )}
+
+        {/* Update Password Form */}
+        {mode === 'update-password' && (
+          <form onSubmit={handleUpdatePassword} className="space-y-4">
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-900 mb-2">
+                  New Password *
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  placeholder="Enter new password (min 8 characters)"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-900 mb-2">
+                  Confirm New Password *
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  placeholder="Confirm new password"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 size={20} className="animate-spin" />
+                  Updating password...
+                </span>
+              ) : (
+                <span className="flex items-center justify-center gap-2">
+                  <Lock size={20} />
+                  Reset Password
+                </span>
+              )}
+            </button>
           </form>
         )}
       </div>

@@ -215,3 +215,43 @@ export async function isUserApproved(email: string): Promise<boolean> {
   const status = await checkWaitlistStatus(email);
   return status === 'approved';
 }
+
+export async function resetPassword(email: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.toLowerCase(), {
+      redirectTo: `${window.location.origin}`
+    });
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+
+    return {
+      success: true,
+      message: 'Password reset email sent! Check your inbox for the reset link.'
+    };
+  } catch (error: any) {
+    console.error('Error sending password reset:', error);
+    return { success: false, message: error.message || 'Failed to send password reset email.' };
+  }
+}
+
+export async function updatePassword(newPassword: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+
+    return {
+      success: true,
+      message: 'Password updated successfully!'
+    };
+  } catch (error: any) {
+    console.error('Error updating password:', error);
+    return { success: false, message: error.message || 'Failed to update password.' };
+  }
+}
