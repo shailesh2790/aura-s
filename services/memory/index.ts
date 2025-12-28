@@ -15,12 +15,16 @@ export { workingMemoryManager, WorkingMemoryManager } from './workingMemory';
 
 // Dynamics
 export { memoryFormationEngine, MemoryFormationEngine } from './formation';
+export { memoryConsolidationEngine, MemoryConsolidationEngine, scheduleConsolidation } from './consolidation';
+export { memoryRetrievalEngine, MemoryRetrievalEngine } from './retrieval';
 
 // Convenience functions for quick access
 import { factualMemoryStore } from './factualMemory';
 import { experientialMemoryStore } from './experientialMemory';
 import { workingMemoryManager } from './workingMemory';
 import { memoryFormationEngine } from './formation';
+import { memoryConsolidationEngine } from './consolidation';
+import { memoryRetrievalEngine } from './retrieval';
 
 /**
  * Initialize memory system for a user session
@@ -74,4 +78,36 @@ export async function clearWorkingMemory(sessionId?: string) {
     // Clear all expired
     await workingMemoryManager.clearExpired();
   }
+}
+
+/**
+ * Run memory consolidation
+ * Merges similar experiences, extracts patterns, and prunes old memories
+ */
+export async function consolidateMemories(userId: string) {
+  const results = await memoryConsolidationEngine.consolidate(userId);
+
+  console.log(`Memory consolidation completed:`, results);
+
+  return results;
+}
+
+/**
+ * Retrieve relevant memories for a query
+ */
+export async function retrieveMemories(
+  userId: string,
+  query: string,
+  contextSessionId?: string
+) {
+  // Get current working memory context if session provided
+  const context = contextSessionId
+    ? await workingMemoryManager.get(contextSessionId)
+    : undefined;
+
+  const results = await memoryRetrievalEngine.retrieve(userId, query, context);
+
+  console.log(`Retrieved ${results.length} relevant memories for query: "${query}"`);
+
+  return results;
 }
