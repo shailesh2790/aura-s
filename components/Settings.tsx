@@ -1,13 +1,16 @@
 import React, { useState, useRef } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { useAuth } from '../context/AuthContext';
-import { Settings as SettingsIcon, Download, Upload, Trash2, Key, Database, Info, LogOut, User } from 'lucide-react';
+import { Settings as SettingsIcon, Download, Upload, Trash2, Key, Database, Info, LogOut, User, Brain, TestTube } from 'lucide-react';
+import { testMemorySystem } from '../src/utils/testMemory';
 
 export const Settings: React.FC = () => {
   const { saveWorkflowToFile, loadWorkflowFromFile, clearAllData, stats, recentFlows } = useWorkflow();
   const { user, signOut } = useAuth();
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
+  const [isTestingMemory, setIsTestingMemory] = useState(false);
+  const [memoryTestResult, setMemoryTestResult] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,6 +28,34 @@ export const Settings: React.FC = () => {
   };
 
   const storedApiKey = localStorage.getItem('aura_api_key_override');
+
+  const handleTestMemory = async () => {
+    if (!user?.id) {
+      alert('Please sign in to test memory system');
+      return;
+    }
+
+    setIsTestingMemory(true);
+    setMemoryTestResult(null);
+
+    try {
+      console.log('🧪 Running memory system tests...');
+      const result = await testMemorySystem(user.id);
+      setMemoryTestResult(result);
+
+      if (result.success) {
+        alert('✅ Memory system tests passed! Check console for details.');
+      } else {
+        alert('❌ Memory system tests failed. Check console for details.');
+      }
+    } catch (error) {
+      console.error('Test error:', error);
+      alert('❌ Memory system test failed: ' + (error as Error).message);
+      setMemoryTestResult({ success: false, error });
+    } finally {
+      setIsTestingMemory(false);
+    }
+  };
 
   return (
     <div className="h-full overflow-auto p-8 bg-white">
@@ -110,6 +141,63 @@ export const Settings: React.FC = () => {
                 >
                   https://console.groq.com/keys
                 </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Memory System Testing */}
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-blue-500/30 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Brain className="w-5 h-5 text-blue-400" />
+            <h2 className="text-xl font-semibold text-white">Memory System (Phase 2)</h2>
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-sm text-gray-300">
+              AURA OS now has advanced memory capabilities with consolidation, retrieval, and reflection.
+            </p>
+
+            <button
+              onClick={handleTestMemory}
+              disabled={isTestingMemory}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 text-white rounded-lg transition"
+            >
+              {isTestingMemory ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Running Tests...
+                </>
+              ) : (
+                <>
+                  <TestTube className="w-4 h-4" />
+                  Test Memory System
+                </>
+              )}
+            </button>
+
+            {memoryTestResult && (
+              <div className={`p-4 rounded-lg ${memoryTestResult.success ? 'bg-green-900/30 border border-green-500/30' : 'bg-red-900/30 border border-red-500/30'}`}>
+                <p className="text-sm font-semibold text-white mb-2">
+                  {memoryTestResult.success ? '✅ Tests Passed' : '❌ Tests Failed'}
+                </p>
+                {memoryTestResult.success && memoryTestResult.stats && (
+                  <div className="text-xs text-gray-300 space-y-1">
+                    <p>Factual Memories: {memoryTestResult.stats.factual.totalCount}</p>
+                    <p>Experiences: {memoryTestResult.stats.experiential.totalCount}</p>
+                    <p>Success Rate: {(memoryTestResult.stats.experiential.successRate * 100).toFixed(1)}%</p>
+                    <p>Pending Actions: {memoryTestResult.actions?.length || 0}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="p-4 bg-slate-900/50 rounded-lg">
+              <p className="text-xs text-gray-400">
+                <strong>Features:</strong> Memory formation, consolidation, context-aware retrieval with temporal decay, daily reflection, and proactive action suggestions.
+              </p>
+              <p className="text-xs text-gray-400 mt-2">
+                Check browser console for detailed test output.
               </p>
             </div>
           </div>
