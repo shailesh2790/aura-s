@@ -18,6 +18,19 @@ Your `.env.local` file now has the correct Supabase credentials!
 
 **IMPORTANT:** You must set up the database tables before testing!
 
+#### If you get "relation already exists" error:
+
+Use the **safe migration script** instead:
+
+1. Go to https://supabase.com/dashboard/project/dhkdbbkaghublvdoblxt
+2. Click "SQL Editor" → "New query"
+3. Copy ALL contents of `supabase/migration-safe.sql`
+4. Paste and click "Run"
+5. This will safely drop and recreate all tables
+6. Should see a table with row counts at the end
+
+#### If starting fresh:
+
 1. Go to https://supabase.com/dashboard/project/dhkdbbkaghublvdoblxt
 2. Click "SQL Editor" → "New query"
 3. Copy ALL contents of `supabase/schema.sql` (430 lines)
