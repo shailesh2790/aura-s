@@ -371,14 +371,22 @@ GROUP BY user_id;
 -- View: Experience summary by user
 CREATE VIEW experience_stats AS
 SELECT
-  user_id,
-  COUNT(*) FILTER (WHERE type = 'success') as success_count,
-  COUNT(*) FILTER (WHERE type = 'failure') as failure_count,
-  COUNT(*) FILTER (WHERE type = 'pattern') as pattern_count,
-  AVG(importance) as avg_importance,
-  COUNT(DISTINCT unnest(learned_skills)) as unique_skills_learned
-FROM experiential_memory
-GROUP BY user_id;
+  em.user_id,
+  COUNT(*) FILTER (WHERE em.type = 'success') as success_count,
+  COUNT(*) FILTER (WHERE em.type = 'failure') as failure_count,
+  COUNT(*) FILTER (WHERE em.type = 'pattern') as pattern_count,
+  AVG(em.importance) as avg_importance,
+  COALESCE(skills.unique_skills_learned, 0) as unique_skills_learned
+FROM experiential_memory em
+LEFT JOIN (
+  SELECT
+    user_id,
+    COUNT(DISTINCT skill) as unique_skills_learned
+  FROM experiential_memory,
+  LATERAL unnest(learned_skills) AS skill
+  GROUP BY user_id
+) skills ON em.user_id = skills.user_id
+GROUP BY em.user_id, skills.unique_skills_learned;
 
 -- View: Proactive actions summary
 CREATE VIEW proactive_summary AS
