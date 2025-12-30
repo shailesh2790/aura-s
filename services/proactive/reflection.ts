@@ -37,7 +37,7 @@ export class ReflectionEngine {
     });
 
     // Analyze performance
-    const summary = this.analyzPerformance(experiences);
+    const summary = this.analyzePerformance(experiences);
     const insights = this.generateInsights(experiences, facts);
     const actions = await this.proposeActions(userId, insights, summary);
 
