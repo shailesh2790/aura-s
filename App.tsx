@@ -12,6 +12,7 @@ import { AgentThoughts } from './components/AgentThoughts';
 import { Pricing } from './components/Pricing';
 import RuntimeDemo from './components/RuntimeDemo';
 import PRDGenerator from './components/PRDGenerator';
+import IntentTester from './components/IntentTester';
 import { Auth } from './components/Auth';
 import { useWorkflow } from './context/WorkflowContext';
 import { useAuth } from './context/AuthContext';
@@ -44,7 +45,8 @@ import {
   BookTemplate,
   Clock,
   Plug,
-  DollarSign
+  DollarSign,
+  Brain
 } from 'lucide-react';
 
 function App() {
@@ -89,7 +91,7 @@ function App() {
   }
 
   // Navigation State
-  const [currentView, setCurrentView] = useState<'dashboard' | 'builder' | 'templates' | 'integrations' | 'history' | 'pricing' | 'runtime' | 'prd' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'builder' | 'templates' | 'integrations' | 'history' | 'pricing' | 'runtime' | 'prd' | 'intent' | 'settings'>('dashboard');
 
   const logEndRef = useRef<HTMLDivElement>(null);
   
@@ -246,6 +248,12 @@ ${documents.length > 0 ? '- **knowledge_base.json**: Exported RAG documents.' : 
                   isActive={currentView === 'prd'}
                   onClick={() => setCurrentView('prd')}
                 />
+               <NavIcon
+                  icon={Brain}
+                  label="Intent Interpreter"
+                  isActive={currentView === 'intent'}
+                  onClick={() => setCurrentView('intent')}
+                />
           </div>
 
           <div className="mt-auto flex flex-col gap-4 w-full px-2">
@@ -293,6 +301,10 @@ ${documents.length > 0 ? '- **knowledge_base.json**: Exported RAG documents.' : 
 
           {currentView === 'prd' && (
               <PRDGenerator />
+          )}
+
+          {currentView === 'intent' && (
+              <IntentTester />
           )}
 
           {currentView === 'settings' && (
