@@ -13,6 +13,7 @@ import { Pricing } from './components/Pricing';
 import RuntimeDemo from './components/RuntimeDemo';
 import PRDGenerator from './components/PRDGenerator';
 import IntentTester from './components/IntentTester';
+import ProblemFramingCanvas from './components/ProblemFramingCanvas';
 import { Auth } from './components/Auth';
 import { useWorkflow } from './context/WorkflowContext';
 import { useAuth } from './context/AuthContext';
@@ -46,7 +47,8 @@ import {
   Clock,
   Plug,
   DollarSign,
-  Brain
+  Brain,
+  Lightbulb
 } from 'lucide-react';
 
 function App() {
@@ -91,7 +93,7 @@ function App() {
   }
 
   // Navigation State
-  const [currentView, setCurrentView] = useState<'dashboard' | 'builder' | 'templates' | 'integrations' | 'history' | 'pricing' | 'runtime' | 'prd' | 'intent' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'builder' | 'templates' | 'integrations' | 'history' | 'pricing' | 'runtime' | 'prd' | 'intent' | 'framing' | 'settings'>('dashboard');
 
   const logEndRef = useRef<HTMLDivElement>(null);
   
@@ -254,6 +256,12 @@ ${documents.length > 0 ? '- **knowledge_base.json**: Exported RAG documents.' : 
                   isActive={currentView === 'intent'}
                   onClick={() => setCurrentView('intent')}
                 />
+               <NavIcon
+                  icon={Lightbulb}
+                  label="Problem Framing"
+                  isActive={currentView === 'framing'}
+                  onClick={() => setCurrentView('framing')}
+                />
           </div>
 
           <div className="mt-auto flex flex-col gap-4 w-full px-2">
@@ -305,6 +313,10 @@ ${documents.length > 0 ? '- **knowledge_base.json**: Exported RAG documents.' : 
 
           {currentView === 'intent' && (
               <IntentTester />
+          )}
+
+          {currentView === 'framing' && (
+              <ProblemFramingCanvas />
           )}
 
           {currentView === 'settings' && (

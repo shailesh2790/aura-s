@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Brain, Zap, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Brain, Zap, Clock, AlertCircle, CheckCircle2, Save, ArrowRight } from 'lucide-react';
 import { parseIntent, formatAmbiguities, estimateTotalDuration, type Intent } from '../services/intent';
 
 export default function IntentTester() {
@@ -13,6 +13,7 @@ export default function IntentTester() {
   const [intent, setIntent] = useState<Intent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const exampleGoals = [
     'Create a detailed PRD for an AI Tutor module for Class 6-10',
@@ -28,6 +29,7 @@ export default function IntentTester() {
     setLoading(true);
     setError(null);
     setIntent(null);
+    setSaved(false);
 
     try {
       const parsedIntent = await parseIntent(pmGoal);
@@ -39,9 +41,37 @@ export default function IntentTester() {
     }
   };
 
+  const handleSave = () => {
+    if (!intent) return;
+
+    // Save to localStorage
+    const savedIntents = JSON.parse(localStorage.getItem('aura_saved_intents') || '[]');
+    savedIntents.unshift({
+      id: Date.now(),
+      pmGoal,
+      intent,
+      savedAt: new Date().toISOString()
+    });
+
+    // Keep only last 10
+    if (savedIntents.length > 10) {
+      savedIntents.splice(10);
+    }
+
+    localStorage.setItem('aura_saved_intents', JSON.stringify(savedIntents));
+    setSaved(true);
+
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleProceed = () => {
+    // TODO: Navigate to Problem Framing Canvas with this intent
+    alert('Problem Framing Canvas coming next! This will let you test assumptions and validate your problem framing.');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-8 overflow-y-auto">
+      <div className="max-w-5xl mx-auto pb-20">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -246,6 +276,24 @@ export default function IntentTester() {
                 </ul>
               </div>
             )}
+
+            {/* Action Buttons */}
+            <div className="pt-4 border-t flex gap-3">
+              <button
+                onClick={handleSave}
+                className="flex-1 bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Save size={20} />
+                {saved ? 'Saved!' : 'Save Intent'}
+              </button>
+              <button
+                onClick={handleProceed}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                Proceed to Problem Framing
+                <ArrowRight size={20} />
+              </button>
+            </div>
           </div>
         )}
       </div>

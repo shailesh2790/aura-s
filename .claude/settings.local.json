@@ -28,7 +28,14 @@
       "Bash(npm run build:*)",
       "Bash(vercel --version:*)",
       "Bash(vercel:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(git push)",
+      "Bash(npx tsc:*)",
+      "Bash(lsof:*)",
+      "Bash(python3:*)",
+      "Bash(powershell -Command \"Add-Type -AssemblyName System.IO.Compression.FileSystem; $zip = [System.IO.Compression.ZipFile]::OpenRead\\(''c:\\\\MLProject\\\\auraagentsos\\\\Aura_OS_Execution_PRD.docx''\\); $entry = $zip.Entries | Where-Object { $_FullName -eq ''word/document.xml'' }; $stream = $entry.Open\\(\\); $reader = New-Object System.IO.StreamReader\\($stream\\); $content = $reader.ReadToEnd\\(\\); $reader.Close\\(\\); $stream.Close\\(\\); $zip.Dispose\\(\\); $content\")",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "Bash(del \"c:\\\\MLProject\\\\auraagentsos\\\\extract_docx.ps1\")"
     ],
     "deny": [],
     "ask": []

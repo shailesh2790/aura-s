@@ -13,7 +13,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 
 const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
+  apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY || '',
   dangerouslyAllowBrowser: true
 });
 
@@ -98,7 +98,17 @@ Return ONLY the JSON object, no other text.`
   }
 
   try {
-    const intent: Intent = JSON.parse(content.text);
+    // Remove markdown code blocks if present
+    let jsonText = content.text.trim();
+
+    // Remove ```json and ``` wrappers
+    if (jsonText.startsWith('```json')) {
+      jsonText = jsonText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (jsonText.startsWith('```')) {
+      jsonText = jsonText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+
+    const intent: Intent = JSON.parse(jsonText.trim());
 
     // Validate the intent structure
     validateIntent(intent);
