@@ -172,7 +172,7 @@ Return ONLY the JSON object, no other text.`
             value={problemStatement}
             onChange={(e) => setProblemStatement(e.target.value)}
             placeholder="Enter the problem you're trying to solve..."
-            className="w-full h-32 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+            className="w-full h-32 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none text-slate-900 placeholder-slate-400 font-medium"
           />
 
           <button
@@ -321,7 +321,7 @@ Return ONLY the JSON object, no other text.`
                       value={criterion}
                       onChange={(e) => updateSuccessCriterion(i, e.target.value)}
                       placeholder="e.g., Reduce checkout abandonment by 20%"
-                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder-slate-400"
                     />
                     {successCriteria.length > 1 && (
                       <button

@@ -93,7 +93,7 @@ export default function IntentTester() {
             value={pmGoal}
             onChange={(e) => setPmGoal(e.target.value)}
             placeholder="Enter your PM goal in plain English..."
-            className="w-full h-32 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full h-32 px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-slate-900 placeholder-slate-400"
           />
 
           {/* Example Goals */}
